@@ -9,16 +9,16 @@ elementoFormulario.addEventListener("submit", function (event) {
   const inputValor = elementoFormulario.querySelector("#valor") as HTMLInputElement;
   const inputData = elementoFormulario.querySelector("#data") as HTMLInputElement;
 
-  let tipoTransacao: string = inputTipoTransacao.value;
+  let tipoTransacao: TipoTransacao = inputTipoTransacao.value as TipoTransacao;
   let valor: number = inputValor.valueAsNumber;
   let data: Date = new Date(inputData.value);
 
   switch (tipoTransacao) {
-    case "Depósito":
+    case TipoTransacao.DEPOSITO:
       saldo += valor;
       break;
-    case "Transferência":
-    case "Pagamento de Boleto":
+    case TipoTransacao.TRANSFERENCIA:
+    case TipoTransacao.PAGAMENTO_BOLETO:
       saldo -= valor;
       break;
     default:
@@ -26,9 +26,9 @@ elementoFormulario.addEventListener("submit", function (event) {
       return;
   }
 
-  elementSaldo.textContent = saldo.toString();
+  elementSaldo.textContent = formatarMoeda(saldo);
 
-  const novaTransacao = {
+  const novaTransacao: Transacao = {
     tipoTransacao: tipoTransacao,
     valor: valor,
     data: data,

@@ -12,18 +12,18 @@ elementoFormulario.addEventListener("submit", function (event) {
     let valor = inputValor.valueAsNumber;
     let data = new Date(inputData.value);
     switch (tipoTransacao) {
-        case "Depósito":
+        case TipoTransacao.DEPOSITO:
             saldo += valor;
             break;
-        case "Transferência":
-        case "Pagamento de Boleto":
+        case TipoTransacao.TRANSFERENCIA:
+        case TipoTransacao.PAGAMENTO_BOLETO:
             saldo -= valor;
             break;
         default:
             alert("Tipo de transação inválido!");
             return;
     }
-    elementSaldo.textContent = saldo.toString();
+    elementSaldo.textContent = formatarMoeda(saldo);
     const novaTransacao = {
         tipoTransacao: tipoTransacao,
         valor: valor,
