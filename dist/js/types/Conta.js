@@ -1,8 +1,16 @@
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+import { Armazenador } from "./Armazenador.js";
+import { ValidaDebito, validaDeposito } from "./Decorators.js";
 import { TipoTransacao } from "./TipoTransacao.js";
 export class Conta {
     nome;
-    saldo = JSON.parse(localStorage.getItem("saldo")) || 0;
-    transacoes = JSON.parse(localStorage.getItem("transacoes"), (key, value) => {
+    saldo = Armazenador.obter("saldo") || 0;
+    transacoes = Armazenador.obter(("transacoes"), (key, value) => {
         if (key === "data") {
             return new Date(value);
         }
@@ -11,22 +19,22 @@ export class Conta {
     constructor(nome) {
         this.nome = nome;
     }
+    getTitular() {
+        return this.nome;
+    }
+    getSaldo() {
+        return this.saldo;
+    }
+    getDataAcesso() {
+        return new Date();
+    }
     debitar(valor) {
-        if (valor <= 0) {
-            throw new Error('O valor a ser debitado deve ser maior que zero!');
-        }
-        if (valor > this.saldo) {
-            throw new Error('Saldo insuficiente!');
-        }
         this.saldo -= valor;
-        localStorage.setItem('saldo', this.saldo.toString());
+        Armazenador.salvar('saldo', this.saldo);
     }
     depositar(valor) {
-        if (valor <= 0) {
-            throw new Error('O valor a ser depositado deve ser maior que zero!');
-        }
         this.saldo += valor;
-        localStorage.setItem('saldo', this.saldo.toString());
+        Armazenador.salvar('saldo', this.saldo);
     }
     getGruposTransacoes() {
         const gruposTransacoes = [];
@@ -46,12 +54,6 @@ export class Conta {
         }
         return gruposTransacoes;
     }
-    getSaldo() {
-        return this.saldo;
-    }
-    getDataAcesso() {
-        return new Date();
-    }
     registrarTransacao(novaTransacao) {
         switch (novaTransacao.tipoTransacao) {
             case TipoTransacao.DEPOSITO:
@@ -66,9 +68,26 @@ export class Conta {
                 throw new Error("Tipo de transação inválido!");
         }
         this.transacoes.push(novaTransacao);
-        localStorage.setItem('transacoes', JSON.stringify(this.transacoes));
+        Armazenador.salvar('transacoes', this.transacoes);
         console.log(this.getGruposTransacoes());
     }
 }
-const contaJoana = new Conta("Joana da Silva Oliveira");
-export default contaJoana;
+__decorate([
+    ValidaDebito
+], Conta.prototype, "debitar", null);
+__decorate([
+    validaDeposito
+], Conta.prototype, "depositar", null);
+export class ContaPremium extends Conta {
+    registrarTransacao(transacao) {
+        if (transacao.tipoTransacao === TipoTransacao.DEPOSITO) {
+            transacao.valor += 0.5;
+            console.log("Ganhou um bônus!");
+        }
+        super.registrarTransacao(transacao);
+    }
+}
+const contax = new Conta("Joana da Silva Oliveira");
+const contaPremium = new ContaPremium("Monica Hillman");
+console.log(contax.getTitular());
+export default contax;
